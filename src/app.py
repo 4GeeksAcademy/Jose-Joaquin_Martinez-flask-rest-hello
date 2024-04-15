@@ -8,7 +8,8 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, People, Planet, Vehicle, Favorite
+import logging
 #from models import Person
 
 app = Flask(__name__)
@@ -25,6 +26,8 @@ MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
 setup_admin(app)
+logging.basicConfig()
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
@@ -37,15 +40,88 @@ def sitemap():
     return generate_sitemap(app)
 
 @app.route('/user', methods=['GET'])
-def handle_hello():
+def get_users():
+    users=User.query.all();
+    users = list(map(lambda x: x.serialize(), users))
+    print('aqui estan los usuarios', users)
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+    return jsonify(users), 200
 
-    return jsonify(response_body), 200
+@app.route('/people', methods=['GET'])
+def get_people():
+    people = People.query.all()
+    if not people:
+        raise APIException('Character does not exist', 404)
+    people = list(map(lambda x: x.serialize(), people))
+    return jsonify(people), 200
 
-# this only runs if `$ python src/app.py` is executed
-if __name__ == '__main__':
-    PORT = int(os.environ.get('PORT', 3000))
-    app.run(host='0.0.0.0', port=PORT, debug=False)
+@app.route('/people/<int:people_id>', methods=['GET'])
+def get_people_by_id(people_id):
+    person = People.query.get_or_404(people_id)
+    if not person:
+        raise APIException('Character does not exist', 404)
+    person = person.serialize()
+    return jsonify(person), 200
+
+@app.route('/planets', methods=['GET'])
+def get_planets():
+    planets = Planet.query.all()
+    planets = list(map(lambda x: x.serialize(), planets))
+    return jsonify(planets), 200
+
+@app.route('/planets/<int:planet_id>', methods=['GET'])
+def get_planet_by_id(planet_id):
+    planet = Planet.query.get_or_404(planet_id)
+    if not planet:
+        raise APIException('Character does not exist', 404)
+    planet = planet.serialize()
+    return jsonify(planet), 200
+
+@app.route('/vehicles',methods=['GET'])
+def get_vehicles():
+    vehicles = Vehicle.query.all()
+    vehicles = list(map(lambda x: x.serialize, vehicles))
+    return jsonify(vehicles), 200
+
+@app.route('/vehicles/<int:vehicle_id>', methods=['GET'])
+def get_vehicle_by_id(vehicle_id):
+    vehicle = Vehicle.query.get_or_404(vehicle_id)
+    if not vehicles:
+        raise APIException('Character does not exist', 404)
+    vehicles = vehicles.serialize()
+    return jsonify(vehicle), 200
+
+@app.route('/favorites/<int:user_id1>', methods=['GET'])
+def get_favorites_by_user_id(user_id1):
+    favorites= Favorite.query.get(user_id1)
+    print('favorites')
+    if not favorites:
+        return jsonify([])
+    favorite = list(map(lambda x: x.serialize(), favorites))
+    print(favorite)
+    return jsonify(favorite), 200
+
+@app.route('/favorites', methods=['POST'])
+def add_favourite_by_id():
+    favorite = request.json
+    new_favorite = Favorite(
+        user_id = favorite["id"],
+        character_id = favorite["character_id"],  
+        planet_id = favorite["planet_id"],  
+        vehicle_id = favorite["vehicle_id"],  
+        favorite_type = favorite["favorite_type"],   
+    )
+    db.session.add(new_favorite)
+    db.session.commit()
+    return ('Favorite added'), 200
+
+@app.route('/favorite/<int:id>', methods=['DELETE'])
+def delete_from_favorites(id):
+    favorite = Favorite.query.get_or_404(id)
+    if not favorite:
+        raise APIException('Favorite element does not exist', status_code=400)
+    db.session.delete(favorite)
+    db.session.commit()
+    return jsonify('Deleted element'), 200
+
+
