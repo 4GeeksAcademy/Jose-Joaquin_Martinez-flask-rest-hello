@@ -1,6 +1,6 @@
-from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
+from flask import Flask
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
@@ -130,13 +130,23 @@ class Favorite(db.Model):
         return '<Favorite %r>' % self.favorite_id
 
     def serialize(self):
-        return {
+        serialized_favorite = {
             "id": self.favorite_id,
             "user_id": self.user_id,
-            "character_id": self.character_id,
-            "planet_id": self.planet_id,
-            "vehicle_id": self.vehicle_id,
-            "favorite_type": self.favorite_type,
-           
-        } 
+            "favorite_type": self.favorite_type
+        }
+
+        if self.character_id:
+            character = People.query.get(self.character_id)
+            serialized_favorite["character_name"] = character.character_name
+
+        if self.planet_id:
+            planet = Planet.query.get(self.planet_id)
+            serialized_favorite["planet_name"] = planet.planet_name
+
+        if self.vehicle_id:
+            vehicle = Vehicle.query.get(self.vehicle_id)
+            serialized_favorite["vehicle_name"] = vehicle.vehicle_name
+
+        return serialized_favorite
     

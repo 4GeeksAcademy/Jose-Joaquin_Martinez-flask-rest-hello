@@ -1,16 +1,11 @@
-"""
-This module takes care of starting the API Server, Loading the DB and Adding the endpoints
-"""
 import os
 from flask import Flask, request, jsonify, url_for
 from flask_migrate import Migrate
-from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User, People, Planet, Vehicle, Favorite
 import logging
-#from models import Person
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -29,12 +24,10 @@ setup_admin(app)
 logging.basicConfig()
 logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
-# Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
 
-# generate sitemap with all your endpoints
 @app.route('/')
 def sitemap():
     return generate_sitemap(app)
@@ -99,17 +92,19 @@ def get_favorites_by_user_id(user_id1):
 
 @app.route('/favorites', methods=['POST'])
 def add_favourite_by_id():
-    favorite = request.json
+    favorite_data = request.json
     new_favorite = Favorite(
-        user_id=favorite["user_id"],
-        character_id=favorite["character_id"],
-        planet_id=favorite["planet_id"],
-        vehicle_id=favorite["vehicle_id"],
-        favorite_type=favorite["favorite_type"],
+        user_id=favorite_data["user_id"],
+        character_id=favorite_data.get("character_id"),
+        planet_id=favorite_data.get("planet_id"),
+        vehicle_id=favorite_data.get("vehicle_id"),
+        favorite_type=favorite_data["favorite_type"],
     )
     db.session.add(new_favorite)
     db.session.commit()
-    return jsonify("Favorite added"), 200
+
+    serialized_favorite = new_favorite.serialize()
+    return jsonify(serialized_favorite), 201
 
 @app.route('/favorite/<int:id>', methods=['DELETE'])
 def delete_from_favorites(id):
