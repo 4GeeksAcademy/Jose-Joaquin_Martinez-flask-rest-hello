@@ -41,10 +41,8 @@ def sitemap():
 
 @app.route('/user', methods=['GET'])
 def get_users():
-    users=User.query.all();
+    users = User.query.all()
     users = list(map(lambda x: x.serialize(), users))
-    print('aqui estan los usuarios', users)
-
     return jsonify(users), 200
 
 @app.route('/people', methods=['GET'])
@@ -73,55 +71,51 @@ def get_planets():
 def get_planet_by_id(planet_id):
     planet = Planet.query.get_or_404(planet_id)
     if not planet:
-        raise APIException('Character does not exist', 404)
+        raise APIException('Planet does not exist', 404)
     planet = planet.serialize()
     return jsonify(planet), 200
 
 @app.route('/vehicles',methods=['GET'])
 def get_vehicles():
     vehicles = Vehicle.query.all()
-    vehicles = list(map(lambda x: x.serialize, vehicles))
+    vehicles = list(map(lambda x: x.serialize(), vehicles))
     return jsonify(vehicles), 200
 
 @app.route('/vehicles/<int:vehicle_id>', methods=['GET'])
 def get_vehicle_by_id(vehicle_id):
     vehicle = Vehicle.query.get_or_404(vehicle_id)
-    if not vehicles:
-        raise APIException('Character does not exist', 404)
-    vehicles = vehicles.serialize()
+    if not vehicle:
+        raise APIException('Vehicle does not exist', 404)
+    vehicle = vehicle.serialize()
     return jsonify(vehicle), 200
 
 @app.route('/favorites/<int:user_id1>', methods=['GET'])
 def get_favorites_by_user_id(user_id1):
-    favorites= Favorite.query.get(user_id1)
-    print('favorites')
+    favorites = Favorite.query.filter_by(user_id=user_id1).all()
     if not favorites:
         return jsonify([])
-    favorite = list(map(lambda x: x.serialize(), favorites))
-    print(favorite)
-    return jsonify(favorite), 200
+    favorites = list(map(lambda x: x.serialize(), favorites))
+    return jsonify(favorites), 200
 
 @app.route('/favorites', methods=['POST'])
 def add_favourite_by_id():
     favorite = request.json
     new_favorite = Favorite(
-        user_id = favorite["id"],
-        character_id = favorite["character_id"],  
-        planet_id = favorite["planet_id"],  
-        vehicle_id = favorite["vehicle_id"],  
-        favorite_type = favorite["favorite_type"],   
+        user_id=favorite["user_id"],
+        character_id=favorite["character_id"],
+        planet_id=favorite["planet_id"],
+        vehicle_id=favorite["vehicle_id"],
+        favorite_type=favorite["favorite_type"],
     )
     db.session.add(new_favorite)
     db.session.commit()
-    return ('Favorite added'), 200
+    return jsonify("Favorite added"), 200
 
 @app.route('/favorite/<int:id>', methods=['DELETE'])
 def delete_from_favorites(id):
     favorite = Favorite.query.get_or_404(id)
     if not favorite:
-        raise APIException('Favorite element does not exist', status_code=400)
+        raise APIException('Favorite element does not exist', status_code=404)
     db.session.delete(favorite)
     db.session.commit()
     return jsonify('Deleted element'), 200
-
-

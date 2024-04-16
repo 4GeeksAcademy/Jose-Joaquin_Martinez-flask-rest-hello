@@ -2,15 +2,14 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, Enum
 from sqlalchemy.orm import relationship, declarative_base
 
-
 db = SQLAlchemy()
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    #id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), nullable=False)
     is_active = db.Column(db.Boolean(), nullable=False)
+    #rel = relationship('Favorite')
 
     def __repr__(self):
         return '<User %r>' % self.id
@@ -33,6 +32,7 @@ class People(db.Model):
     birth_year = db.Column(db.String(20))
     gender = db.Column(db.String(20))
     homeworld = db.Column(db.String(30))
+    #rel = relationship('Favorite')
 
     def __repr__(self):
         return '<People %r>' % self.people_id
@@ -62,6 +62,7 @@ class Planet(db.Model):
     climate = db.Column(db.String(50))
     terrain = db.Column(db.String(50))
     surface_water = db.Column(db.Integer)
+    #rel = relationship('Favorite')
 
     def __repr__(self):
         return '<Planet %r>' % self.planet_id
@@ -93,6 +94,7 @@ class Vehicle(db.Model):
     model = db.Column(db.String(80))
     passengers = db.Column(db.Integer)
     vehicle_class = db.Column(db.String(50))
+    #rel = relationship('Favorite')
 
     def __repr__(self):
         return '<Vehicle %r>' % self.vehicle_id
@@ -115,22 +117,33 @@ class Vehicle(db.Model):
 class Favorite(db.Model):
     __tablename__= "favorites"
     favorite_id = db.Column(db.Integer, primary_key=True)
-    id = db.Column(db.Integer, db.ForeignKey(User.id))
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id))
     character_id = db.Column(db.Integer, db.ForeignKey(People.people_id))
     planet_id = db.Column(db.Integer, db.ForeignKey(Planet.planet_id))
     vehicle_id = db.Column(db.Integer, db.ForeignKey(Vehicle.vehicle_id))
     favorite_type = db.Column(db.String(10), nullable=False)
+    """ planet=db.relationship('Planet', backref="favorite")
+    character=db.relationship('Character', backref="favorite")
+    user=db.relationship('User', backref="favorite") """
 
-    
     def __repr__(self):
         return '<Favorite %r>' % self.favorite_id
 
     def serialize(self):
         return {
             "id": self.favorite_id,
-            #"id": self.id,
+            "user_id": self.user_id,
             "character_id": self.character_id,
             "planet_id": self.planet_id,
             "vehicle_id": self.vehicle_id,
             "favorite_type": self.favorite_type
         } 
+    
+    
+   """  def serialize(self):
+        return{
+            "id": self.id,
+            "personajes_name" : self.personajes_name,
+            "planetas_name": self.planetas_name,
+            "user_name" : self.user_name
+        } """
