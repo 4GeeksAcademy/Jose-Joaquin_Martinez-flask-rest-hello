@@ -39,7 +39,7 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/user', methods=['GET'])
+@app.route('/user', methods=['GET']) 
 def get_users():
     users = User.query.all()
     users = list(map(lambda x: x.serialize(), users))
@@ -89,7 +89,7 @@ def get_vehicle_by_id(vehicle_id):
     vehicle = vehicle.serialize()
     return jsonify(vehicle), 200
 
-@app.route('/favorites/<int:user_id1>', methods=['GET'])
+@app.route('/favorites/<int:user_id1>', methods=['GET']) 
 def get_favorites_by_user_id(user_id1):
     favorites = Favorite.query.filter_by(user_id=user_id1).all()
     if not favorites:
@@ -114,8 +114,9 @@ def add_favourite_by_id():
 @app.route('/favorite/<int:id>', methods=['DELETE'])
 def delete_from_favorites(id):
     favorite = Favorite.query.get_or_404(id)
-    if not favorite:
-        raise APIException('Favorite element does not exist', status_code=404)
     db.session.delete(favorite)
     db.session.commit()
     return jsonify('Deleted element'), 200
+
+if __name__ == "__main__":
+    app.run(debug=True)
