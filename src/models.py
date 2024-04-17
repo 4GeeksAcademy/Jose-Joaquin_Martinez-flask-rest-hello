@@ -34,7 +34,7 @@ class People(db.Model):
     birth_year = db.Column(db.String(20))
     gender = db.Column(db.String(20))
     homeworld = db.Column(db.String(30))
-    favorites = db.relationship('Favorite', backref='character')
+    favorites = relationship('Favorite', backref='character')
 
     def __repr__(self):
         return '<People %r>' % self.people_id
@@ -65,7 +65,7 @@ class Planet(db.Model):
     climate = db.Column(db.String(50))
     terrain = db.Column(db.String(50))
     surface_water = db.Column(db.Integer)
-    favorites = db.relationship('Favorite', backref='planet')
+    favorites = relationship('Favorite', backref='planet')
 
     def __repr__(self):
         return '<Planet %r>' % self.planet_id
@@ -97,7 +97,7 @@ class Vehicle(db.Model):
     model = db.Column(db.String(80))
     passengers = db.Column(db.Integer)
     vehicle_class = db.Column(db.String(50))
-    favorites = db.relationship('Favorite', backref='vehicle')
+    favorites = relationship('Favorite', backref='vehicle')
 
     def __repr__(self):
         return '<Vehicle %r>' % self.vehicle_id
