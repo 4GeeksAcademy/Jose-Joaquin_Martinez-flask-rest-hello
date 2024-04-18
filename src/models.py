@@ -12,6 +12,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), nullable=False)
     is_active = db.Column(db.Boolean(), nullable=False)
+    favorites = relationship('Favorite', backref='user', lazy=True)
 
     def __repr__(self):
         return '<User %r>' % self.id
@@ -34,7 +35,7 @@ class People(db.Model):
     birth_year = db.Column(db.String(20))
     gender = db.Column(db.String(20))
     homeworld = db.Column(db.String(30))
-    favorites = relationship('Favorite', backref='character')
+    favorites = relationship('Favorite', backref='character', lazy=True)
 
     def __repr__(self):
         return '<People %r>' % self.people_id
@@ -65,7 +66,7 @@ class Planet(db.Model):
     climate = db.Column(db.String(50))
     terrain = db.Column(db.String(50))
     surface_water = db.Column(db.Integer)
-    favorites = relationship('Favorite', backref='planet')
+    favorites = relationship('Favorite', backref='planet', lazy=True)
 
     def __repr__(self):
         return '<Planet %r>' % self.planet_id
@@ -97,7 +98,7 @@ class Vehicle(db.Model):
     model = db.Column(db.String(80))
     passengers = db.Column(db.Integer)
     vehicle_class = db.Column(db.String(50))
-    favorites = relationship('Favorite', backref='vehicle')
+    favorites = relationship('Favorite', backref='vehicle', lazy=True)
 
     def __repr__(self):
         return '<Vehicle %r>' % self.vehicle_id

@@ -48,6 +48,7 @@ def get_people():
     people = list(map(lambda x: x.serialize(), people))
     return jsonify(people), 200
 
+
 @app.route('/people/<int:people_id>', methods=['GET'])
 def get_people_by_id(people_id):
     person = People.query.get_or_404(people_id)
@@ -55,6 +56,7 @@ def get_people_by_id(people_id):
         raise APIException('Character does not exist', 404)
     person = person.serialize()
     return jsonify(person), 200
+
 
 @app.route('/people', methods=['POST'])
 def add_people_to_the_table():
